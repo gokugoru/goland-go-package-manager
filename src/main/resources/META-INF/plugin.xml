@@ -1,0 +1,131 @@
+<idea-plugin>
+    <id>com.github.golangadvisor</id>
+    <name>Golang Advisor</name>
+    <vendor email="support@golangadvisor.dev" url="https://github.com/your-username/golang-advisor">
+        Golang Advisor
+    </vendor>
+
+    <description><![CDATA[
+        <h2>Golang Advisor - Go Dependencies Manager</h2>
+        <p>A GUI plugin for managing Go libraries directly from your IDE.</p>
+
+        <h3>Features:</h3>
+        <ul>
+            <li><b>View Packages</b> - Display all installed packages from go.mod</li>
+            <li><b>Add Packages</b> - Search and add new Go packages</li>
+            <li><b>Update Packages</b> - Check for updates and upgrade dependencies</li>
+            <li><b>Remove Packages</b> - Easily remove unused packages</li>
+            <li><b>Go Modules Integration</b> - Full support for Go Modules</li>
+        </ul>
+
+        <h3>Usage:</h3>
+        <p>Open the Golang Advisor tool window from the right sidebar to manage your Go dependencies.</p>
+    ]]></description>
+
+    <!-- Product and version compatibility -->
+    <idea-version since-build="241" until-build="243.*"/>
+
+    <!-- Plugin dependencies -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.go</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Tool Window -->
+        <toolWindow id="Golang Advisor"
+                    anchor="right"
+                    icon="/icons/toolWindow.svg"
+                    factoryClass="com.github.golangadvisor.toolwindow.GolangAdvisorToolWindowFactory"/>
+
+        <!-- Project Services -->
+        <projectService
+            serviceImplementation="com.github.golangadvisor.services.GoModService"/>
+        <projectService
+            serviceImplementation="com.github.golangadvisor.services.ImportScannerService"/>
+        <projectService
+            serviceImplementation="com.github.golangadvisor.services.ToolWindowService"/>
+
+        <!-- Application Services -->
+        <applicationService
+            serviceImplementation="com.github.golangadvisor.services.PackageSearchService"/>
+        <applicationService
+            serviceImplementation="com.github.golangadvisor.services.VersionCheckService"/>
+        <applicationService
+            serviceImplementation="com.github.golangadvisor.settings.GolangAdvisorSettings"/>
+
+        <!-- Settings/Preferences -->
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.github.golangadvisor.settings.GolangAdvisorConfigurable"
+            id="com.github.golangadvisor.settings"
+            displayName="Golang Advisor"/>
+
+        <!-- Notifications -->
+        <notificationGroup id="Golang Advisor"
+                          displayType="BALLOON"/>
+
+        <!-- Startup Activity (optional - for initialization) -->
+        <postStartupActivity
+            implementation="com.github.golangadvisor.GolangAdvisorStartupActivity"/>
+    </extensions>
+
+    <actions>
+        <!-- Main Action Group for Tool Window Toolbar -->
+        <group id="GolangAdvisor.ToolWindowActions"
+               text="Golang Advisor Actions"
+               description="Actions for managing Go packages">
+            <action id="GolangAdvisor.AddPackage"
+                    class="com.github.golangadvisor.actions.AddPackageAction"
+                    text="Add Package"
+                    description="Add a new Go package to the project"
+                    icon="AllIcons.General.Add"/>
+            <action id="GolangAdvisor.RemovePackage"
+                    class="com.github.golangadvisor.actions.RemovePackageAction"
+                    text="Remove Package"
+                    description="Remove the selected package from the project"
+                    icon="AllIcons.General.Remove"/>
+            <action id="GolangAdvisor.UpdatePackage"
+                    class="com.github.golangadvisor.actions.UpdatePackageAction"
+                    text="Update Package"
+                    description="Update the selected package to a newer version"
+                    icon="AllIcons.Actions.Download"/>
+            <action id="GolangAdvisor.UpdateAll"
+                    class="com.github.golangadvisor.actions.UpdateAllPackagesAction"
+                    text="Update All Packages"
+                    description="Update all packages to their latest versions"
+                    icon="AllIcons.Actions.CheckMultiOn"/>
+            <separator/>
+            <action id="GolangAdvisor.Refresh"
+                    class="com.github.golangadvisor.actions.RefreshPackagesAction"
+                    text="Refresh"
+                    description="Refresh the package list"
+                    icon="AllIcons.Actions.Refresh"/>
+        </group>
+
+        <!-- Context Menu for Package Table -->
+        <group id="GolangAdvisor.PackageContextMenu"
+               text="Package Actions"
+               popup="true">
+            <reference ref="GolangAdvisor.UpdatePackage"/>
+            <reference ref="GolangAdvisor.RemovePackage"/>
+            <separator/>
+            <action id="GolangAdvisor.ViewOnPkgGoDev"
+                    class="com.github.golangadvisor.actions.ViewOnPkgGoDevAction"
+                    text="View on pkg.go.dev"
+                    description="Open package documentation on pkg.go.dev"
+                    icon="AllIcons.Ide.External_link_arrow"/>
+            <action id="GolangAdvisor.CopyImportPath"
+                    class="com.github.golangadvisor.actions.CopyImportPathAction"
+                    text="Copy Import Path"
+                    description="Copy the package import path to clipboard"
+                    icon="AllIcons.Actions.Copy"/>
+        </group>
+
+        <!-- Keyboard Shortcuts -->
+        <action id="GolangAdvisor.OpenToolWindow"
+                class="com.github.golangadvisor.actions.OpenToolWindowAction"
+                text="Open Golang Advisor"
+                description="Open the Golang Advisor tool window">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt shift G"/>
+        </action>
+    </actions>
+</idea-plugin>
