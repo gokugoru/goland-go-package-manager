@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project
  */
 object NotificationUtil {
 
-    private const val GROUP_ID = "Golang Advisor"
+    private const val GROUP_ID = "Go Package Manager"
 
     /**
      * Shows an information notification.

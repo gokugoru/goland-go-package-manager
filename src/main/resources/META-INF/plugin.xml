@@ -1,13 +1,13 @@
 <idea-plugin>
     <id>com.github.golangadvisor</id>
-    <name>Golang Advisor</name>
-    <vendor email="support@golangadvisor.dev" url="https://github.com/your-username/golang-advisor">
-        Golang Advisor
+    <name>Go Package Manager</name>
+    <vendor email="support@gopackagemanager.dev" url="https://github.com/gokugoru/goland-go-advisor">
+        Go Package Manager
     </vendor>
 
     <description><![CDATA[
-        <h2>Golang Advisor - Go Dependencies Manager</h2>
-        <p>A GUI plugin for managing Go libraries directly from your IDE.</p>
+        <h2>Go Package Manager</h2>
+        <p>A GUI plugin for managing Go dependencies directly from your IDE.</p>
 
         <h3>Features:</h3>
         <ul>
@@ -15,11 +15,11 @@
             <li><b>Add Packages</b> - Search and add new Go packages</li>
             <li><b>Update Packages</b> - Check for updates and upgrade dependencies</li>
             <li><b>Remove Packages</b> - Easily remove unused packages</li>
-            <li><b>Go Modules Integration</b> - Full support for Go Modules</li>
+            <li><b>Usage Detection</b> - See which packages are used vs transitive</li>
         </ul>
 
         <h3>Usage:</h3>
-        <p>Open the Golang Advisor tool window from the right sidebar to manage your Go dependencies.</p>
+        <p>Open the Go Package Manager tool window from the right sidebar to manage your dependencies.</p>
     ]]></description>
 
     <!-- Product and version compatibility -->
@@ -31,7 +31,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Tool Window -->
-        <toolWindow id="Golang Advisor"
+        <toolWindow id="Go Package Manager"
                     anchor="right"
                     icon="/icons/toolWindow.svg"
                     factoryClass="com.github.golangadvisor.toolwindow.GolangAdvisorToolWindowFactory"/>
@@ -57,10 +57,10 @@
             parentId="tools"
             instance="com.github.golangadvisor.settings.GolangAdvisorConfigurable"
             id="com.github.golangadvisor.settings"
-            displayName="Golang Advisor"/>
+            displayName="Go Package Manager"/>
 
         <!-- Notifications -->
-        <notificationGroup id="Golang Advisor"
+        <notificationGroup id="Go Package Manager"
                           displayType="BALLOON"/>
 
         <!-- Startup Activity (optional - for initialization) -->
@@ -71,7 +71,7 @@
     <actions>
         <!-- Main Action Group for Tool Window Toolbar -->
         <group id="GolangAdvisor.ToolWindowActions"
-               text="Golang Advisor Actions"
+               text="Go Package Manager Actions"
                description="Actions for managing Go packages">
             <action id="GolangAdvisor.AddPackage"
                     class="com.github.golangadvisor.actions.AddPackageAction"
@@ -123,8 +123,8 @@
         <!-- Keyboard Shortcuts -->
         <action id="GolangAdvisor.OpenToolWindow"
                 class="com.github.golangadvisor.actions.OpenToolWindowAction"
-                text="Open Golang Advisor"
-                description="Open the Golang Advisor tool window">
+                text="Open Go Package Manager"
+                description="Open the Go Package Manager tool window">
             <keyboard-shortcut keymap="$default" first-keystroke="alt shift G"/>
         </action>
     </actions>
