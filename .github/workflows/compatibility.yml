@@ -1,0 +1,88 @@
+name: EAP Compatibility Check
+
+on:
+  schedule:
+    # Every day at 9:00 UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+jobs:
+  verify-eap:
+    name: Verify EAP Compatibility
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Plugin
+        run: ./gradlew buildPlugin
+
+      - name: Verify Plugin Against EAP
+        id: verify
+        run: ./gradlew verifyPlugin
+        env:
+          VERIFY_EAP: true
+
+      - name: Send Telegram Notification (Compatible)
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d parse_mode="HTML" \
+            -d text="✅ <b>EAP Compatibility Check Passed</b>%0A%0A📦 <b>Plugin:</b> Go Package Manager%0A🔍 <b>Status:</b> Compatible with latest EAP%0A📅 <b>Date:</b> $(date +'%Y-%m-%d')%0A%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Details</a>"
+
+      - name: Send Telegram Notification (Incompatible)
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d parse_mode="HTML" \
+            -d text="⚠️ <b>EAP Compatibility Issue Detected</b>%0A%0A📦 <b>Plugin:</b> Go Package Manager%0A🔍 <b>Status:</b> Incompatible with latest EAP%0A📅 <b>Date:</b> $(date +'%Y-%m-%d')%0A%0A❗ Action required: Review and fix compatibility issues%0A%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Details</a>"
+
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '⚠️ EAP Compatibility Issue Detected';
+            const body = `
+            The daily EAP compatibility check has failed.
+
+            **Workflow run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+            Please review the Plugin Verifier output and fix any compatibility issues before the next IDE release.
+            `;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'compatibility'
+            });
+
+            const existingIssue = issues.data.find(issue => issue.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['compatibility', 'bug']
+              });
+            }

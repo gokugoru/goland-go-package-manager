@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
 jobs:
   build:
     name: Build Plugin
@@ -38,6 +42,22 @@ jobs:
         with:
           name: plugin-artifact
           path: build/distributions/*.zip
+
+      - name: Send Telegram Notification (Success)
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d parse_mode="HTML" \
+            -d text="✅ <b>Build Successful</b>%0A%0A📦 <b>Plugin:</b> Go Package Manager%0A🔀 <b>Branch:</b> ${{ github.ref_name }}%0A📝 <b>Commit:</b> <code>${{ github.sha }}</code>%0A👤 <b>Author:</b> ${{ github.actor }}%0A%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Run</a>"
+
+      - name: Send Telegram Notification (Failure)
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d parse_mode="HTML" \
+            -d text="❌ <b>Build Failed</b>%0A%0A📦 <b>Plugin:</b> Go Package Manager%0A🔀 <b>Branch:</b> ${{ github.ref_name }}%0A📝 <b>Commit:</b> <code>${{ github.sha }}</code>%0A👤 <b>Author:</b> ${{ github.actor }}%0A%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Run</a>"
 
   # Runs plugin structure verification
   verify:

@@ -112,6 +112,10 @@ intellijPlatform {
     pluginVerification {
         ides {
             recommended()
+            // Include EAP versions when VERIFY_EAP environment variable is set
+            if (environment("VERIFY_EAP").orNull?.toBoolean() == true) {
+                ide("GO", "2025.2")  // Current EAP
+            }
         }
     }
 }
@@ -124,7 +128,7 @@ changelog {
 
 tasks {
     wrapper {
-        gradleVersion = "8.10"
+        gradleVersion = "8.12"
     }
 
     test {
